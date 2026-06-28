@@ -1,1 +1,63 @@
-<div id="root"></div><script type="module" src="/src/main.jsx"></script>
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Τζόγος Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="card">
+      <div class="top">
+        <p class="label">Κεντρικό κουτί</p>
+        <h1>Τζόγος</h1>
+      </div>
+
+      <div class="totalBox">
+        <p>Σύνολο</p>
+        <h2 id="total">0,00 €</h2>
+        <span id="status">Ουδέτερο</span>
+      </div>
+
+      <div class="weeklyBox">
+        <p>Εβδομαδιαίο σύνολο</p>
+        <h3 id="weeklyTotal">0,00 €</h3>
+        <span id="weeklyStatus">Αυτή την εβδομάδα: Ουδέτερο</span>
+      </div>
+
+      <input id="amount" type="number" inputmode="decimal" placeholder="Βάλε ποσό π.χ. 20" />
+
+      <div class="buttons">
+        <button class="win" onclick="addTransaction('win')">+ Κέρδη</button>
+        <button class="loss" onclick="addTransaction('loss')">- Χαμένα</button>
+      </div>
+
+      <div class="info">
+        <p><strong>Τελευταία φορά:</strong></p>
+        <p id="lastPlayed">-</p>
+      </div>
+
+      <div class="stats">
+        <div>
+          <small>Συνολικά κέρδη</small>
+          <b id="totalWins">0,00 €</b>
+        </div>
+        <div>
+          <small>Συνολικά χαμένα</small>
+          <b id="totalLosses">0,00 €</b>
+        </div>
+      </div>
+
+      <button class="reset" onclick="resetAll()">Μηδενισμός</button>
+    </section>
+
+    <section class="historyCard">
+      <h3>Ιστορικό</h3>
+      <div id="history"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
