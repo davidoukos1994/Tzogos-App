@@ -9,6 +9,22 @@ function save() {
   localStorage.setItem("transactions", JSON.stringify(transactions));
 }
 
+function normaliseOldTransactions() {
+  transactions = transactions.map(item => {
+    const isoDate = item.isoDate || item.date || new Date().toISOString();
+    return {
+      id: item.id || crypto.randomUUID(),
+      type: item.type,
+      amount: Number(item.amount) || 0,
+      isoDate,
+      activity: item.activity || item.what || "",
+      notes: item.notes || "",
+      displayDate: item.displayDate || formatDate(isoDate)
+    };
+  });
+  save();
+}
+
 function amountValue(item) {
   return item.type === "win" ? item.amount : -item.amount;
 }
@@ -41,10 +57,26 @@ function getWeeklyTotal() {
 
   return transactions
     .filter(item => {
-      const itemDate = new Date(item.isoDate || item.date);
+      const itemDate = new Date(item.isoDate);
       return itemDate >= start && itemDate < end;
     })
     .reduce((sum, item) => sum + amountValue(item), 0);
+}
+
+function formatDate(isoDate) {
+  return new Date(isoDate).toLocaleString("el-GR", {
+    dateStyle: "short",
+    timeStyle: "short"
+  });
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function setMoneyStatus(value, moneyEl, statusEl, positiveText, negativeText, neutralText) {
@@ -87,8 +119,9 @@ function render() {
   document.getElementById("totalWins").textContent = formatter.format(getWins());
   document.getElementById("totalLosses").textContent = formatter.format(getLosses());
 
-  const last = transactions[transactions.length - 1];
-  document.getElementById("lastPlayed").textContent = last ? last.displayDate : "-";
+  const sorted = transactions.slice().sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
+  const last = sorted[sorted.length - 1];
+  document.getElementById("lastPlayed").textContent = last ? `${formatDate(last.isoDate)}${last.activity ? " — " + last.activity : ""}` : "-";
 
   const history = document.getElementById("history");
   if (transactions.length === 0) {
@@ -98,15 +131,17 @@ function render() {
 
   history.innerHTML = transactions
     .slice()
-    .reverse()
+    .sort((a, b) => new Date(b.isoDate) - new Date(a.isoDate))
     .map(item => `
       <div class="historyItem">
-        <div>
+        <div class="historyText">
           <strong class="${item.type === "win" ? "plus" : "minus"}">
             ${item.type === "win" ? "+ Κέρδη" : "- Χαμένα"}
           </strong>
           <br>
-          <small>${item.displayDate || item.date}</small>
+          <small>${formatDate(item.isoDate)}</small>
+          ${item.activity ? `<p class="activity">${escapeHtml(item.activity)}</p>` : ""}
+          ${item.notes ? `<p class="notes">${escapeHtml(item.notes)}</p>` : ""}
         </div>
         <strong class="${item.type === "win" ? "plus" : "minus"}">
           ${item.type === "win" ? "+" : "-"}${formatter.format(item.amount)}
@@ -117,24 +152,38 @@ function render() {
 }
 
 function addTransaction(type) {
-  const input = document.getElementById("amount");
-  const amount = Number(input.value);
+  const amountInput = document.getElementById("amount");
+  const dateInput = document.getElementById("playedAt");
+  const activityInput = document.getElementById("activity");
+  const notesInput = document.getElementById("notes");
+  const amount = Number(amountInput.value);
 
   if (!amount || amount <= 0) {
     alert("Βάλε σωστό ποσό.");
     return;
   }
 
-  const now = new Date();
+  const playedDate = dateInput.value ? new Date(dateInput.value) : new Date();
+
+  if (Number.isNaN(playedDate.getTime())) {
+    alert("Βάλε σωστή ημερομηνία.");
+    return;
+  }
 
   transactions.push({
+    id: crypto.randomUUID(),
     type,
     amount,
-    isoDate: now.toISOString(),
-    displayDate: now.toLocaleString("el-GR")
+    isoDate: playedDate.toISOString(),
+    displayDate: formatDate(playedDate.toISOString()),
+    activity: activityInput.value.trim(),
+    notes: notesInput.value.trim()
   });
 
-  input.value = "";
+  amountInput.value = "";
+  dateInput.value = "";
+  activityInput.value = "";
+  notesInput.value = "";
   save();
   render();
 }
@@ -148,4 +197,5 @@ function resetAll() {
   render();
 }
 
+normaliseOldTransactions();
 render();

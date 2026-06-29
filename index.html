@@ -26,7 +26,14 @@
         <span id="weeklyStatus">Αυτή την εβδομάδα: Ουδέτερο</span>
       </div>
 
-      <input id="amount" type="number" inputmode="decimal" placeholder="Βάλε ποσό π.χ. 20" />
+      <div class="formBox">
+        <p class="sectionTitle">Νέα καταχώρηση</p>
+        <input id="amount" type="number" inputmode="decimal" placeholder="Ποσό π.χ. 20" />
+        <input id="playedAt" type="datetime-local" />
+        <input id="activity" type="text" placeholder="Τι έκανες τότε; π.χ. φρουτάκια, στοίχημα" />
+        <textarea id="notes" rows="3" placeholder="Σημειώσεις προαιρετικά"></textarea>
+        <small class="hint">Άφησε την ημερομηνία κενή για να μπει αυτόματα η σημερινή. Βάλε παλιά ημερομηνία για παλιό ιστορικό.</small>
+      </div>
 
       <div class="buttons">
         <button class="win" onclick="addTransaction('win')">+ Κέρδη</button>
